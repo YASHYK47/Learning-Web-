@@ -7,6 +7,7 @@ const {ObjectID}=require('mongodb');
 var {mongoose}=require('./db/mongoose.js');
 var {Todo}=require('./models/todo.js');
 var {Users}=require('./models/user.js')
+var {authenticate}=require('./middleware/authenticate.js');
 
 var app=express();
 const port=process.env.PORT||3000;
@@ -94,6 +95,14 @@ app.post('/users',(req,res)=>{
   }).catch((e)=>{
     res.status(400).send(e);
   });
+});
+
+
+app.get('/users/me', authenticate,(req,res)=>{
+  var token=req.header('x-auth');
+  Users.findByToken(token).then((user)=>{
+    res.send(req.user);
+});
 });
 app.listen(port,()=>{
   console.log(`Started up at port:${port}`);
